@@ -11,7 +11,7 @@ export interface Conference {
   full_name?: string;
   year: number;
   link?: string;
-  deadline: string; // Keep for backward compatibility
+  deadline?: string; // Legacy single-deadline field (optional)
   deadlines?: Deadline[]; // New multiple deadlines support
   timezone?: string;
   date: string;
