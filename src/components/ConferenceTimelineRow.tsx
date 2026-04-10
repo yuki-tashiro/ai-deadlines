@@ -70,7 +70,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                     className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 appearance-none rounded-full border-0 bg-red-400/50 p-0"
                     style={{
                       left: `${toPercent(deadline.positionDate, rangeStart, rangeEnd)}%`,
-                      top: `calc(50% + ${((index % 5) - 2) * 3}px)`,
+                      top: "50%",
                     }}
                     aria-label={`${deadline.sourceYear} deadline`}
                   />
