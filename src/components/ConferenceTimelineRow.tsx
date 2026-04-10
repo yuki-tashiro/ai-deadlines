@@ -67,13 +67,16 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 appearance-none rounded-full border-0 bg-red-400/50 p-0"
-                    style={{ left: `${toPercent(deadline.positionDate, rangeStart, rangeEnd)}%` }}
+                    className="absolute h-2 w-2 -translate-x-1/2 -translate-y-1/2 appearance-none rounded-full border-0 bg-red-400/50 p-0"
+                    style={{
+                      left: `${toPercent(deadline.positionDate, rangeStart, rangeEnd)}%`,
+                      top: `calc(50% + ${((index % 5) - 2) * 3}px)`,
+                    }}
                     aria-label={`${deadline.sourceYear} deadline`}
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p className="text-xs">{`${deadline.sourceYear} deadline: ${formatDisplayDate(deadline.originalDate)}`}</p>
+                  <p className="text-xs">{`${row.title} ${deadline.sourceYear} – ${formatDisplayDate(deadline.originalDate)}`}</p>
                 </TooltipContent>
               </Tooltip>
             ))}
