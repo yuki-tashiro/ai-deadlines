@@ -47,7 +47,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
               <span
                 className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-blue-700 shadow-sm ring-1 ring-blue-200"
               >
-                {formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)}
+                {`Conference: ${formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)}`}
               </span>
               <div
                 className="h-2 w-full rounded-full bg-blue-500/65 shadow-sm ring-1 ring-blue-600/20"
