@@ -48,14 +48,18 @@ function normalizeText(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+function stripTrailingYear(value: string): string {
+  return value.replace(/\s*(?:\(|-|_)?(?:19|20)\d{2}\)?\s*$/i, "").trim();
+}
+
 function baseIdWithoutYear(id: string): string {
   return id.toLowerCase().replace(/([_-]?20\d{2}|[_-]?\d{2})$/, "");
 }
 
 function getSeriesKey(conf: Conference): string {
   const idBase = conf.id ? baseIdWithoutYear(conf.id) : "";
-  const fullNameBase = conf.full_name ? normalizeText(conf.full_name) : "";
-  const titleBase = normalizeText(conf.title);
+  const fullNameBase = conf.full_name ? normalizeText(stripTrailingYear(conf.full_name)) : "";
+  const titleBase = normalizeText(stripTrailingYear(conf.title));
   return idBase || fullNameBase || titleBase;
 }
 
@@ -166,22 +170,20 @@ export function buildConferenceTimelineRows(
       const conferenceStart = chosenEntry ? parseConferenceDate(chosenEntry.start) : null;
       const conferenceEnd = chosenEntry ? parseConferenceDate(chosenEntry.end) : null;
 
-      const historicalDeadlines = chosenYear
-        ? series.entries
-            .filter((entry) => entry.year >= chosenYear - 5 && entry.year < chosenYear)
-            .map((entry) => {
-              const historicalDeadline = pickRepresentativeDeadline(entry);
-              if (!historicalDeadline) return null;
+      const historicalDeadlines = series.entries
+        .filter((entry) => entry.year >= referenceYear - 5 && entry.year < referenceYear)
+        .map((entry) => {
+          const historicalDeadline = pickRepresentativeDeadline(entry);
+          if (!historicalDeadline) return null;
 
-              return {
-                sourceYear: entry.year,
-                originalDate: historicalDeadline,
-                positionDate: mapMonthDayToYear(historicalDeadline, referenceYear),
-              };
-            })
-            .filter((deadline): deadline is TimelineHistoricalDeadline => deadline !== null)
-            .sort((a, b) => a.positionDate.getTime() - b.positionDate.getTime())
-        : [];
+          return {
+            sourceYear: entry.year,
+            originalDate: historicalDeadline,
+            positionDate: mapMonthDayToYear(historicalDeadline, referenceYear),
+          };
+        })
+        .filter((deadline): deadline is TimelineHistoricalDeadline => deadline !== null)
+        .sort((a, b) => a.sourceYear - b.sourceYear || a.positionDate.getTime() - b.positionDate.getTime());
 
       return {
         seriesKey: series.key,

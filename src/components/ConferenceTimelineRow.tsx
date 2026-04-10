@@ -47,19 +47,17 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
               className="absolute top-1/2 -translate-y-1/2"
               style={{
                 left: `${conferenceBar.left}%`,
-                width: `${Math.max(conferenceBar.right - conferenceBar.left, 0.4)}%`,
+                width: `${Math.max(conferenceBar.right - conferenceBar.left, 1.2)}%`,
               }}
             >
               <div
-                className="h-[3px] w-full rounded-full bg-blue-500/70"
+                className="h-2 w-full rounded-full bg-blue-500/65 shadow-sm ring-1 ring-blue-600/20"
                 title={
                   row.conferenceStart && row.conferenceEnd
                     ? `Conference: ${formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)}`
                     : undefined
                 }
               />
-              <span className="absolute left-0 top-1/2 h-3 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-700" />
-              <span className="absolute right-0 top-1/2 h-3 w-[2px] translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-700" />
             </div>
           )}
 
