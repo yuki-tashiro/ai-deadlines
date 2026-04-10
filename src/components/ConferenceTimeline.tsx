@@ -1,6 +1,8 @@
 import { addMonths, format, isAfter, startOfMonth } from "date-fns";
 import { TimelineSeriesRow } from "@/utils/conferenceTimeline";
 import ConferenceTimelineRow from "@/components/ConferenceTimelineRow";
+import { formatDisplayDateTime } from "@/utils/dateDisplay";
+import { useEffect, useRef } from "react";
 
 interface ConferenceTimelineProps {
   rows: TimelineSeriesRow[];
@@ -17,6 +19,8 @@ const toPercent = (date: Date, rangeStart: Date, rangeEnd: Date) => {
 };
 
 const ConferenceTimeline = ({ rows, rangeStart, rangeEnd, nowAoe }: ConferenceTimelineProps) => {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const timelineGridRef = useRef<HTMLDivElement>(null);
   const monthTicks: Date[] = [];
   const yearTicks: Date[] = [];
   let cursor = startOfMonth(rangeStart);
@@ -30,16 +34,29 @@ const ConferenceTimeline = ({ rows, rangeStart, rangeEnd, nowAoe }: ConferenceTi
 
   const nowPercent = toPercent(nowAoe, rangeStart, rangeEnd);
 
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const timelineGrid = timelineGridRef.current;
+    if (!scrollContainer || !timelineGrid) return;
+
+    const labelColumnWidth = 220;
+    const timelineWidth = Math.max(timelineGrid.scrollWidth - labelColumnWidth, 0);
+    const nowX = labelColumnWidth + (timelineWidth * nowPercent) / 100;
+    const targetScrollLeft = Math.max(0, nowX - scrollContainer.clientWidth / 2);
+
+    scrollContainer.scrollLeft = targetScrollLeft;
+  }, [nowPercent, rows.length]);
+
   return (
     <div className="rounded-lg bg-white p-4 shadow">
-      <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
-        <div className="grid min-w-[1600px] grid-cols-[220px_1fr]">
+      <div ref={scrollContainerRef} className="overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div ref={timelineGridRef} className="grid min-w-[1600px] grid-cols-[220px_1fr]">
           <div className="sticky left-0 z-20 border-b bg-white py-2 pr-3 text-xs text-neutral-500">Conference</div>
           <div className="relative min-h-10 border-b py-1 text-xs text-neutral-500">
             <div
               className="pointer-events-none absolute bottom-0 top-0 w-[2px] -translate-x-1/2 bg-emerald-600/80"
               style={{ left: `${nowPercent}%` }}
-              title={`Now (AoE): ${format(nowAoe, "yyyy-MM-dd HH:mm")}`}
+              title={`Now (AoE): ${formatDisplayDateTime(nowAoe)}`}
             />
             {yearTicks.map((tick) => (
               <span

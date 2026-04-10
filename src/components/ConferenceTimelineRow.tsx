@@ -1,6 +1,6 @@
-import { format } from "date-fns";
 import { TimelineSeriesRow } from "@/utils/conferenceTimeline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { formatDisplayDate, formatDisplayDateRange } from "@/utils/dateDisplay";
 
 interface ConferenceTimelineRowProps {
   row: TimelineSeriesRow;
@@ -38,23 +38,29 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
       <div className="relative border-b border-neutral-200 py-3">
         <div className="relative h-12 rounded bg-neutral-100">
           <div
-            className="pointer-events-none absolute top-0 h-8 w-[2px] -translate-x-1/2 bg-emerald-600/80"
+            className="pointer-events-none absolute top-1/2 h-8 w-[2px] -translate-x-1/2 -translate-y-1/2 bg-emerald-600/80"
             style={{ left: `${nowPercent}%` }}
           />
 
           {conferenceBar && (
             <div
-              className="absolute top-1.5 h-5 rounded bg-blue-500/60"
+              className="absolute top-1/2 -translate-y-1/2"
               style={{
                 left: `${conferenceBar.left}%`,
-                width: `${Math.max(conferenceBar.right - conferenceBar.left, 1)}%`,
+                width: `${Math.max(conferenceBar.right - conferenceBar.left, 0.4)}%`,
               }}
-              title={
-                row.conferenceStart && row.conferenceEnd
-                  ? `Conference: ${format(row.conferenceStart, "yyyy-MM-dd")} - ${format(row.conferenceEnd, "yyyy-MM-dd")}`
-                  : undefined
-              }
-            />
+            >
+              <div
+                className="h-[3px] w-full rounded-full bg-blue-500/70"
+                title={
+                  row.conferenceStart && row.conferenceEnd
+                    ? `Conference: ${formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)}`
+                    : undefined
+                }
+              />
+              <span className="absolute left-0 top-1/2 h-3 w-[2px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-700" />
+              <span className="absolute right-0 top-1/2 h-3 w-[2px] translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-700" />
+            </div>
           )}
 
           <TooltipProvider>
@@ -69,7 +75,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                   />
                 </TooltipTrigger>
                 <TooltipContent side="top">
-                  <p className="text-xs">{`${deadline.sourceYear} deadline: ${format(deadline.originalDate, "yyyy-MM-dd")}`}</p>
+                  <p className="text-xs">{`${deadline.sourceYear} deadline: ${formatDisplayDate(deadline.originalDate)}`}</p>
                 </TooltipContent>
               </Tooltip>
             ))}
@@ -82,12 +88,12 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
             >
               <span
                 className="block h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
-                title={`Reference deadline: ${format(row.currentDeadline, "yyyy-MM-dd")}`}
+                title={`Reference deadline: ${formatDisplayDate(row.currentDeadline)}`}
               />
               <span
                 className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
               >
-                {format(row.currentDeadline, "yyyy-MM-dd")}
+                {formatDisplayDate(row.currentDeadline)}
               </span>
             </div>
           )}

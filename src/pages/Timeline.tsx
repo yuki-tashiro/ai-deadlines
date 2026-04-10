@@ -5,6 +5,7 @@ import TimelineLegend from "@/components/TimelineLegend";
 import conferencesData from "@/utils/conferenceLoader";
 import { Conference } from "@/types/conference";
 import { TimelineSort, buildConferenceTimelineRows } from "@/utils/conferenceTimeline";
+import { HOMEPAGE_TAGS } from "@/constants/homepageTags";
 import { addYears } from "date-fns";
 import { utcToZonedTime } from "date-fns-tz";
 import { useMemo, useState } from "react";
@@ -21,11 +22,12 @@ const TimelinePage = () => {
   const rangeEnd = useMemo(() => addYears(nowAoe, 1), [nowAoe]);
 
   const tagOptions = useMemo(() => {
-    const tags = new Set<string>();
+    const availableTags = new Set<string>();
     (conferencesData as Conference[]).forEach((conf) => {
-      (conf.tags || []).forEach((tag) => tags.add(tag));
+      (conf.tags || []).forEach((tag) => availableTags.add(tag));
     });
-    return Array.from(tags).sort((a, b) => a.localeCompare(b));
+
+    return HOMEPAGE_TAGS.filter((tag) => availableTags.has(tag));
   }, []);
 
   const timelineRows = useMemo(() => {
