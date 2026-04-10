@@ -18,9 +18,13 @@ const toPercent = (date: Date, rangeStart: Date, rangeEnd: Date) => {
 
 const ConferenceTimeline = ({ rows, rangeStart, rangeEnd, nowAoe }: ConferenceTimelineProps) => {
   const monthTicks: Date[] = [];
+  const yearTicks: Date[] = [];
   let cursor = startOfMonth(rangeStart);
   while (!isAfter(cursor, rangeEnd)) {
     monthTicks.push(cursor);
+    if (cursor.getMonth() === 0) {
+      yearTicks.push(cursor);
+    }
     cursor = addMonths(cursor, 1);
   }
 
@@ -31,19 +35,28 @@ const ConferenceTimeline = ({ rows, rangeStart, rangeEnd, nowAoe }: ConferenceTi
       <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: "touch" }}>
         <div className="grid min-w-[1600px] grid-cols-[220px_1fr]">
           <div className="sticky left-0 z-20 border-b bg-white py-2 pr-3 text-xs text-neutral-500">Conference</div>
-          <div className="relative border-b py-2 text-xs text-neutral-500">
+          <div className="relative min-h-10 border-b py-1 text-xs text-neutral-500">
             <div
               className="pointer-events-none absolute bottom-0 top-0 w-[2px] -translate-x-1/2 bg-emerald-600/80"
               style={{ left: `${nowPercent}%` }}
               title={`Now (AoE): ${format(nowAoe, "yyyy-MM-dd HH:mm")}`}
             />
-            {monthTicks.map((tick) => (
+            {yearTicks.map((tick) => (
               <span
                 key={tick.toISOString()}
-                className="absolute -translate-x-1/2"
+                className="absolute top-1 -translate-x-1/2 text-[11px] font-medium text-neutral-700"
                 style={{ left: `${toPercent(tick, rangeStart, rangeEnd)}%` }}
               >
-                {format(tick, "yyyy MMM")}
+                {format(tick, "yyyy")}
+              </span>
+            ))}
+            {monthTicks.map((tick) => (
+              <span
+                key={`${tick.toISOString()}-month`}
+                className="absolute top-5 -translate-x-1/2 text-[10px]"
+                style={{ left: `${toPercent(tick, rangeStart, rangeEnd)}%` }}
+              >
+                {format(tick, "MMM")}
               </span>
             ))}
           </div>
