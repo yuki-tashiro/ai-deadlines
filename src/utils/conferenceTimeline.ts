@@ -12,9 +12,15 @@ export interface TimelineSeriesRow {
   referenceEntry: Conference | null;
   referenceYear: number | null;
   currentDeadline: Date | null;
-  historicalDeadlines: Date[];
+  historicalDeadlines: TimelineHistoricalDeadline[];
   conferenceStart: Date | null;
   conferenceEnd: Date | null;
+}
+
+export interface TimelineHistoricalDeadline {
+  sourceYear: number;
+  originalDate: Date;
+  positionDate: Date;
 }
 
 interface TimelineSeriesInternal {
@@ -163,10 +169,18 @@ export function buildConferenceTimelineRows(
       const historicalDeadlines = chosenYear
         ? series.entries
             .filter((entry) => entry.year >= chosenYear - 5 && entry.year < chosenYear)
-            .map((entry) => pickRepresentativeDeadline(entry))
-            .filter((date): date is Date => date !== null)
-            .map((date) => mapMonthDayToYear(date, referenceYear))
-            .sort((a, b) => a.getTime() - b.getTime())
+            .map((entry) => {
+              const historicalDeadline = pickRepresentativeDeadline(entry);
+              if (!historicalDeadline) return null;
+
+              return {
+                sourceYear: entry.year,
+                originalDate: historicalDeadline,
+                positionDate: mapMonthDayToYear(historicalDeadline, referenceYear),
+              };
+            })
+            .filter((deadline): deadline is TimelineHistoricalDeadline => deadline !== null)
+            .sort((a, b) => a.positionDate.getTime() - b.positionDate.getTime())
         : [];
 
       return {
@@ -193,8 +207,14 @@ export function buildConferenceTimelineRows(
       return aTime - bTime || a.title.localeCompare(b.title);
     }
 
-    const aTime = a.currentDeadline?.getTime() ?? Number.MAX_SAFE_INTEGER;
-    const bTime = b.currentDeadline?.getTime() ?? Number.MAX_SAFE_INTEGER;
-    return aTime - bTime || a.title.localeCompare(b.title);
+    // Rows with deadlines come first. Inside that group, show farther-future first,
+    // then move toward already-passed dates to improve scanability.
+    const aHasDeadline = a.currentDeadline !== null;
+    const bHasDeadline = b.currentDeadline !== null;
+    if (aHasDeadline !== bHasDeadline) return aHasDeadline ? -1 : 1;
+
+    const aTime = a.currentDeadline?.getTime() ?? Number.NEGATIVE_INFINITY;
+    const bTime = b.currentDeadline?.getTime() ?? Number.NEGATIVE_INFINITY;
+    return bTime - aTime || a.title.localeCompare(b.title);
   });
 }
