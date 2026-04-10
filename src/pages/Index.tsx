@@ -16,6 +16,7 @@ import { getAllCountries } from "@/utils/countryExtractor";
 import { getDeadlineInLocalTime } from "@/utils/dateUtils";
 import { sortConferencesByDeadline } from "@/utils/conferenceUtils";
 import { hasUpcomingDeadlines } from "@/utils/deadlineUtils";
+import { HOMEPAGE_TAGS } from "@/constants/homepageTags";
 
 const Index = () => {
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
@@ -42,11 +43,11 @@ const Index = () => {
       }
     });
     
-    return Array.from(tagCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([tag]) => ({
+    return HOMEPAGE_TAGS
+      .filter((tag) => tagCounts.has(tag))
+      .map((tag) => ({
         id: tag,
-        label: tag.split("-").map(word => 
+        label: tag.split("-").map(word =>
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(" ")
       }));

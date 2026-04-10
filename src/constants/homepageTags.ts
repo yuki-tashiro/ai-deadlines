@@ -1,0 +1,15 @@
+export const HOMEPAGE_TAGS = [
+  "machine-learning",
+  "natural-language-processing",
+  "data-mining",
+  "computer-vision",
+  "robotics",
+  "web-search",
+  "human-computer-interaction",
+  "lifelong-learning",
+  "large-language-models",
+  "speech",
+  "signal-processing",
+  "computer-graphics",
+  "information-retrieval",
+] as const;
