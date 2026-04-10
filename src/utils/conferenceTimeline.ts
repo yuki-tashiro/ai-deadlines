@@ -118,6 +118,34 @@ function mapMonthDayToYear(date: Date, year: number): Date {
   return mapped;
 }
 
+function collectHistoricalDeadlines(
+  entries: Conference[],
+  referenceYear: number,
+  referenceDeadline: Date | null,
+): TimelineHistoricalDeadline[] {
+  if (!referenceDeadline) return [];
+
+  const windowStart = new Date(referenceYear - 5, 0, 1);
+
+  return entries
+    .map((entry) => {
+      const historicalDeadline = pickRepresentativeDeadline(entry);
+      if (!historicalDeadline) return null;
+
+      if (historicalDeadline < windowStart || historicalDeadline >= referenceDeadline) {
+        return null;
+      }
+
+      return {
+        sourceYear: entry.year,
+        originalDate: historicalDeadline,
+        positionDate: mapMonthDayToYear(historicalDeadline, referenceYear),
+      };
+    })
+    .filter((deadline): deadline is TimelineHistoricalDeadline => deadline !== null)
+    .sort((a, b) => a.originalDate.getTime() - b.originalDate.getTime() || a.sourceYear - b.sourceYear);
+}
+
 export function buildConferenceTimelineRows(
   conferences: Conference[],
   referenceDate: Date,
@@ -170,20 +198,7 @@ export function buildConferenceTimelineRows(
       const conferenceStart = chosenEntry ? parseConferenceDate(chosenEntry.start) : null;
       const conferenceEnd = chosenEntry ? parseConferenceDate(chosenEntry.end) : null;
 
-      const historicalDeadlines = series.entries
-        .filter((entry) => entry.year >= referenceYear - 5 && entry.year < referenceYear)
-        .map((entry) => {
-          const historicalDeadline = pickRepresentativeDeadline(entry);
-          if (!historicalDeadline) return null;
-
-          return {
-            sourceYear: entry.year,
-            originalDate: historicalDeadline,
-            positionDate: mapMonthDayToYear(historicalDeadline, referenceYear),
-          };
-        })
-        .filter((deadline): deadline is TimelineHistoricalDeadline => deadline !== null)
-        .sort((a, b) => a.sourceYear - b.sourceYear || a.positionDate.getTime() - b.positionDate.getTime());
+      const historicalDeadlines = collectHistoricalDeadlines(series.entries, referenceYear, currentDeadline);
 
       return {
         seriesKey: series.key,
