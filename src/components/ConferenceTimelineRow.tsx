@@ -63,7 +63,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="absolute top-[1.05rem] h-2 w-2 -translate-x-1/2 appearance-none rounded-full border-0 bg-red-400/50 p-0"
+                    className="absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 appearance-none rounded-full border-0 bg-red-400/50 p-0"
                     style={{ left: `${toPercent(deadline.positionDate, rangeStart, rangeEnd)}%` }}
                     aria-label={`${deadline.sourceYear} deadline`}
                   />
@@ -76,19 +76,20 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
           </TooltipProvider>
 
           {row.currentDeadline && (
-            <>
+            <div
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{ left: `${toPercent(row.currentDeadline, rangeStart, rangeEnd)}%` }}
+            >
               <span
-                className="absolute top-[0.55rem] h-4 w-4 -translate-x-1/2 rounded-full border-2 border-white bg-red-500 shadow"
-                style={{ left: `${toPercent(row.currentDeadline, rangeStart, rangeEnd)}%` }}
+                className="block h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
                 title={`Reference deadline: ${format(row.currentDeadline, "yyyy-MM-dd")}`}
               />
               <span
-                className="pointer-events-none absolute top-[-0.15rem] -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
-                style={{ left: `${toPercent(row.currentDeadline, rangeStart, rangeEnd)}%` }}
+                className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
               >
                 {format(row.currentDeadline, "yyyy-MM-dd")}
               </span>
-            </>
+            </div>
           )}
         </div>
       </div>

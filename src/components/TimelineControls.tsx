@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -30,13 +29,13 @@ const TimelineControls = ({
   onToggleTag,
 }: TimelineControlsProps) => {
   return (
-    <div className="space-y-3 rounded-lg bg-white p-4 shadow">
+    <div className="relative z-30 space-y-3 rounded-lg bg-white p-4 shadow">
       <div className="w-[220px]">
         <Select value={sortBy} onValueChange={(value) => onSortChange(value as TimelineSort)}>
-          <SelectTrigger>
+          <SelectTrigger className="bg-white shadow-sm border-neutral-300">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-[80] border-neutral-200 bg-white shadow-lg">
             <SelectItem value="upcoming-deadline">Upcoming deadline</SelectItem>
             <SelectItem value="alphabetical">Alphabetical</SelectItem>
             <SelectItem value="conference-date">Conference date</SelectItem>
@@ -46,14 +45,18 @@ const TimelineControls = ({
 
       <div className="flex flex-wrap gap-2">
         {tagOptions.map((tag) => (
-          <Button
+          <button
             key={tag}
-            size="sm"
-            variant={selectedTags.has(tag) ? "default" : "secondary"}
+            type="button"
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedTags.has(tag)
+                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+            }`}
             onClick={() => onToggleTag(tag)}
           >
             {formatTag(tag)}
-          </Button>
+          </button>
         ))}
       </div>
     </div>
