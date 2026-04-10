@@ -5,20 +5,20 @@ import TimelineLegend from "@/components/TimelineLegend";
 import conferencesData from "@/utils/conferenceLoader";
 import { Conference } from "@/types/conference";
 import { TimelineSort, buildConferenceTimelineRows } from "@/utils/conferenceTimeline";
+import { addYears } from "date-fns";
+import { utcToZonedTime } from "date-fns-tz";
 import { useMemo, useState } from "react";
 
+const AOE_TZ = "Etc/GMT+12";
+
 const TimelinePage = () => {
-  const currentYear = new Date().getFullYear();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [sortBy, setSortBy] = useState<TimelineSort>("upcoming-deadline");
   const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
 
-  const allYears = useMemo(() => {
-    const years = new Set<number>([currentYear]);
-    (conferencesData as Conference[]).forEach((conf) => years.add(conf.year));
-    return Array.from(years).sort((a, b) => b - a);
-  }, [currentYear]);
+  const nowAoe = useMemo(() => utcToZonedTime(new Date(), AOE_TZ), []);
+  const rangeStart = useMemo(() => addYears(nowAoe, -1), [nowAoe]);
+  const rangeEnd = useMemo(() => addYears(nowAoe, 1), [nowAoe]);
 
   const tagOptions = useMemo(() => {
     const tags = new Set<string>();
@@ -31,12 +31,12 @@ const TimelinePage = () => {
   const timelineRows = useMemo(() => {
     return buildConferenceTimelineRows(
       conferencesData as Conference[],
-      selectedYear,
+      nowAoe,
       selectedTags,
       searchQuery,
       sortBy,
     );
-  }, [selectedYear, selectedTags, searchQuery, sortBy]);
+  }, [nowAoe, selectedTags, searchQuery, sortBy]);
 
   const handleToggleTag = (tag: string) => {
     setSelectedTags((prev) => {
@@ -55,17 +55,14 @@ const TimelinePage = () => {
       <Header onSearch={setSearchQuery} />
       <div className="mx-auto max-w-7xl space-y-4 px-4 py-4 sm:px-6 lg:px-8">
         <TimelineControls
-          selectedYear={selectedYear}
-          availableYears={allYears}
           sortBy={sortBy}
-          onYearChange={setSelectedYear}
           onSortChange={setSortBy}
           selectedTags={selectedTags}
           tagOptions={tagOptions}
           onToggleTag={handleToggleTag}
         />
         <TimelineLegend />
-        <ConferenceTimeline rows={timelineRows} selectedYear={selectedYear} />
+        <ConferenceTimeline rows={timelineRows} rangeStart={rangeStart} rangeEnd={rangeEnd} nowAoe={nowAoe} />
       </div>
     </div>
   );

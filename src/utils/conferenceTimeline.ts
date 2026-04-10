@@ -1,7 +1,7 @@
 import { Conference, Deadline } from "@/types/conference";
 import { getAllDeadlines } from "@/utils/deadlineUtils";
 import { getDeadlineInLocalTime } from "@/utils/dateUtils";
-import { isValid, parseISO } from "date-fns";
+import { isValid, parseISO, setYear } from "date-fns";
 
 export type TimelineSort = "upcoming-deadline" | "alphabetical" | "conference-date";
 
@@ -9,8 +9,8 @@ export interface TimelineSeriesRow {
   seriesKey: string;
   title: string;
   tags: string[];
-  selectedYearEntry: Conference | null;
-  selectedYear: number | null;
+  referenceEntry: Conference | null;
+  referenceYear: number | null;
   currentDeadline: Date | null;
   historicalDeadlines: Date[];
   conferenceStart: Date | null;
@@ -50,7 +50,6 @@ function getSeriesKey(conf: Conference): string {
   const idBase = conf.id ? baseIdWithoutYear(conf.id) : "";
   const fullNameBase = conf.full_name ? normalizeText(conf.full_name) : "";
   const titleBase = normalizeText(conf.title);
-
   return idBase || fullNameBase || titleBase;
 }
 
@@ -72,47 +71,52 @@ function pickRepresentativeDeadline(conf: Conference): Date | null {
     .filter((entry): entry is { raw: Deadline; parsed: Date } => entry !== null)
     .sort((a, b) => a.parsed.getTime() - b.parsed.getTime());
 
-  if (datedDeadlines.length === 0) {
-    return null;
-  }
+  if (datedDeadlines.length === 0) return null;
 
   const submissionLike = datedDeadlines.filter(({ raw }) => {
     const type = raw.type.toLowerCase();
     const label = raw.label.toLowerCase();
     return SUBMISSION_HINTS.some((hint) => type.includes(hint) || label.includes(hint));
   });
-
-  if (submissionLike.length > 0) {
-    return submissionLike[0].parsed;
-  }
+  if (submissionLike.length > 0) return submissionLike[0].parsed;
 
   const mainFallback = datedDeadlines.find(({ raw }) => !NON_MAIN_DEADLINE_TYPES.has(raw.type.toLowerCase()));
-  if (mainFallback) {
-    return mainFallback.parsed;
-  }
+  if (mainFallback) return mainFallback.parsed;
 
   return datedDeadlines[0].parsed;
 }
 
-function chooseSelectedYearEntry(entries: Conference[], selectedYear: number): Conference | null {
+function chooseReferenceEntry(entries: Conference[], referenceYear: number): Conference | null {
   const sorted = [...entries].sort((a, b) => a.year - b.year);
-  const exact = sorted.find((entry) => entry.year === selectedYear);
+  const exact = sorted.find((entry) => entry.year === referenceYear);
   if (exact) return exact;
 
-  // Deterministic fallback: nearest future year first, otherwise the latest past year.
-  const nextFuture = sorted.find((entry) => entry.year > selectedYear);
+  const nextFuture = sorted.find((entry) => entry.year > referenceYear);
   if (nextFuture) return nextFuture;
 
   return sorted.length > 0 ? sorted[sorted.length - 1] : null;
 }
 
+function mapMonthDayToYear(date: Date, year: number): Date {
+  // Show historical variation as month/day points on one shared yearly position.
+  const mapped = setYear(date, year);
+
+  if (mapped.getMonth() !== date.getMonth()) {
+    return new Date(year, date.getMonth() + 1, 0, date.getHours(), date.getMinutes(), date.getSeconds());
+  }
+
+  return mapped;
+}
+
 export function buildConferenceTimelineRows(
   conferences: Conference[],
-  selectedYear: number,
+  referenceDate: Date,
   selectedTags: Set<string>,
   searchQuery: string,
   sortBy: TimelineSort,
 ): TimelineSeriesRow[] {
+  const referenceYear = referenceDate.getFullYear();
+
   const grouped = conferences.reduce<Map<string, TimelineSeriesInternal>>((acc, conf) => {
     const key = getSeriesKey(conf);
     const existing = acc.get(key);
@@ -149,23 +153,28 @@ export function buildConferenceTimelineRows(
       );
     })
     .map<TimelineSeriesRow>((series) => {
-      const chosenEntry = chooseSelectedYearEntry(series.entries, selectedYear);
+      const chosenEntry = chooseReferenceEntry(series.entries, referenceYear);
+      const chosenYear = chosenEntry?.year ?? null;
+
       const currentDeadline = chosenEntry ? pickRepresentativeDeadline(chosenEntry) : null;
       const conferenceStart = chosenEntry ? parseConferenceDate(chosenEntry.start) : null;
       const conferenceEnd = chosenEntry ? parseConferenceDate(chosenEntry.end) : null;
 
-      const historicalDeadlines = series.entries
-        .filter((entry) => entry.year >= selectedYear - 5 && entry.year < selectedYear)
-        .map((entry) => pickRepresentativeDeadline(entry))
-        .filter((date): date is Date => date !== null)
-        .sort((a, b) => a.getTime() - b.getTime());
+      const historicalDeadlines = chosenYear
+        ? series.entries
+            .filter((entry) => entry.year >= chosenYear - 5 && entry.year < chosenYear)
+            .map((entry) => pickRepresentativeDeadline(entry))
+            .filter((date): date is Date => date !== null)
+            .map((date) => mapMonthDayToYear(date, referenceYear))
+            .sort((a, b) => a.getTime() - b.getTime())
+        : [];
 
       return {
         seriesKey: series.key,
         title: series.title,
         tags: Array.from(series.tags),
-        selectedYearEntry: chosenEntry,
-        selectedYear: chosenEntry?.year ?? null,
+        referenceEntry: chosenEntry,
+        referenceYear: chosenYear,
         currentDeadline,
         historicalDeadlines,
         conferenceStart,
