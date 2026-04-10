@@ -53,7 +53,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                 className="h-2 w-full rounded-full bg-blue-500/65 shadow-sm ring-1 ring-blue-600/20"
                 title={
                   row.conferenceStart && row.conferenceEnd
-                    ? `Conference: ${formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)}`
+                    ? formatDisplayDateRange(row.conferenceStart, row.conferenceEnd)
                     : undefined
                 }
               />
