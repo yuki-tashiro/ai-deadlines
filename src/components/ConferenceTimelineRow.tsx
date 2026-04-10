@@ -1,6 +1,7 @@
 import { TimelineSeriesRow } from "@/utils/conferenceTimeline";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { formatDisplayDate, formatDisplayDateRange } from "@/utils/dateDisplay";
+import { toPercent } from "@/utils/timelinePosition";
 
 interface ConferenceTimelineRowProps {
   row: TimelineSeriesRow;
@@ -9,13 +10,6 @@ interface ConferenceTimelineRowProps {
   nowPercent: number;
   referenceYear: number;
 }
-
-const toPercent = (date: Date, rangeStart: Date, rangeEnd: Date) => {
-  const total = rangeEnd.getTime() - rangeStart.getTime();
-  if (total <= 0) return 0;
-  const value = ((date.getTime() - rangeStart.getTime()) / total) * 100;
-  return Math.min(100, Math.max(0, value));
-};
 
 const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenceYear }: ConferenceTimelineRowProps) => {
   const conferenceBar =
@@ -92,7 +86,7 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
                 title={`Reference deadline: ${formatDisplayDate(row.currentDeadline)}`}
               />
               <span
-                className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
+                className="pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
               >
                 {formatDisplayDate(row.currentDeadline)}
               </span>

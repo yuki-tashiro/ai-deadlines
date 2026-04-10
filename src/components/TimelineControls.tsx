@@ -29,13 +29,16 @@ const TimelineControls = ({
   onToggleTag,
 }: TimelineControlsProps) => {
   return (
-    <div className="relative z-30 space-y-3 rounded-lg bg-white p-4 shadow">
-      <div className="w-[220px]">
+    <div className="relative z-30 rounded-lg bg-white p-4 shadow">
+      <div className="mb-3 flex flex-wrap items-center gap-3">
         <Select value={sortBy} onValueChange={(value) => onSortChange(value as TimelineSort)}>
-          <SelectTrigger className="bg-white shadow-sm border-neutral-300">
+          <SelectTrigger className="h-9 w-[220px] border-neutral-300 bg-white shadow-sm">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
-          <SelectContent className="z-[80] border-neutral-200 bg-white shadow-lg">
+          <SelectContent
+            position="popper"
+            className="z-[80] border border-neutral-200 bg-white shadow-lg"
+          >
             <SelectItem value="upcoming-deadline">Upcoming deadline</SelectItem>
             <SelectItem value="alphabetical">Alphabetical</SelectItem>
             <SelectItem value="conference-date">Conference date</SelectItem>

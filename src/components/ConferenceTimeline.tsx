@@ -2,6 +2,7 @@ import { addMonths, format, isAfter, startOfMonth } from "date-fns";
 import { TimelineSeriesRow } from "@/utils/conferenceTimeline";
 import ConferenceTimelineRow from "@/components/ConferenceTimelineRow";
 import { formatDisplayDateTime } from "@/utils/dateDisplay";
+import { toPercent } from "@/utils/timelinePosition";
 import { useEffect, useRef } from "react";
 
 interface ConferenceTimelineProps {
@@ -10,13 +11,6 @@ interface ConferenceTimelineProps {
   rangeEnd: Date;
   nowAoe: Date;
 }
-
-const toPercent = (date: Date, rangeStart: Date, rangeEnd: Date) => {
-  const total = rangeEnd.getTime() - rangeStart.getTime();
-  if (total <= 0) return 0;
-  const value = ((date.getTime() - rangeStart.getTime()) / total) * 100;
-  return Math.min(100, Math.max(0, value));
-};
 
 const ConferenceTimeline = ({ rows, rangeStart, rangeEnd, nowAoe }: ConferenceTimelineProps) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
