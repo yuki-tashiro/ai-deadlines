@@ -83,10 +83,10 @@ const ConferenceTimelineRow = ({ row, rangeStart, rangeEnd, nowPercent, referenc
             >
               <span
                 className="block h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow"
-                title={`Reference deadline: ${formatDisplayDate(row.currentDeadline)}`}
+                title={`Deadline: ${formatDisplayDate(row.currentDeadline)}`}
               />
               <span
-                className="pointer-events-none absolute left-full top-1/2 ml-2 -translate-y-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
+                className="pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap rounded bg-white/95 px-1.5 py-0.5 text-[10px] font-medium text-red-700 shadow-sm ring-1 ring-red-200"
               >
                 {formatDisplayDate(row.currentDeadline)}
               </span>
